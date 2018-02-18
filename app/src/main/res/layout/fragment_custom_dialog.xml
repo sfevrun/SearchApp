@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingTop="30dp"
+    >
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:textAlignment="center"
+            android:text="Begin Date"
+            android:textColor="@color/colorText"
+            android:textSize="@dimen/fab_margin"/>
+
+        <EditText
+            android:id="@+id/bgDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+
+            android:hint="yy/MM/DD"
+            android:onClick="showDatePicker"/>
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:text="Sort Order"
+            android:textColor="@color/colorText"
+            android:textSize="@dimen/fab_margin"
+            android:layout_marginTop="15dp"/>
+
+
+        <Spinner
+            android:id="@+id/txtSort"
+            android:layout_width="230dp"
+            android:layout_height="wrap_content"
+            android:entries="@array/filters_array"
+            android:prompt="@string/filter_prompt"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:background="@android:drawable/edit_text"/>
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/fab_margin"
+            android:text="News Desk Values"
+            android:textColor="@color/colorText"
+            android:layout_marginTop="20dp"/>
+        <LinearLayout
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <CheckBox
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Arts" />
+            <CheckBox
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Fashion &amp; Style" />
+            <CheckBox
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sports" />
+        </LinearLayout>
+
+
+        <Button
+            android:id="@+id/btOk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SAVE"
+            android:textColor="#fff"
+            android:background="@color/colorText"
+            android:layout_marginTop="15dp"/>
+    </LinearLayout>
+</ScrollView>
+
+
+</LinearLayout>
