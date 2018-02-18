@@ -31,15 +31,26 @@ public class Article implements Parcelable {
         return snippet;
     }
 
+    public String getKeywords() {
+        return keywords;
+    }
+
+    public String getNew_desk() {
+        return new_desk;
+    }
+
     String webUrl;
     String haedline;
     String thumbNail;
     String snippet;
+    String keywords;
+    String new_desk;
     public Article(JSONObject jsonObject){
         try{
             this.webUrl=jsonObject.getString("web_url");
             this.snippet=jsonObject.getString("snippet");
             this.haedline=jsonObject.getJSONObject("headline").getString("main");
+            this.new_desk=jsonObject.getString("new_desk");
             JSONArray _multimedia=jsonObject.getJSONArray("multimedia");
             if(_multimedia.length()>0){
 
@@ -56,6 +67,16 @@ public class Article implements Parcelable {
             }else{
                 this.thumbNail="";
             }
+
+            JSONArray _keywords=jsonObject.getJSONArray("keywords");
+            if(_keywords.length()>0){
+
+                  JSONObject _keywordsjon=_keywords.getJSONObject(0);
+                 this.keywords=_keywordsjon.getString("value");
+            }else{
+                this.keywords="";
+            }
+
 
         }catch (JSONException e){
 
@@ -85,6 +106,8 @@ public class Article implements Parcelable {
         parcel.writeString(haedline);
         parcel.writeString(thumbNail);
         parcel.writeString(snippet);
+        parcel.writeString(keywords);
+        parcel.writeString(new_desk);
     }
     public static final Parcelable.Creator<Article> CREATOR = new Parcelable.Creator<Article>()
     {
@@ -104,7 +127,8 @@ public class Article implements Parcelable {
         this.haedline= in.readString();
         this.thumbNail = in.readString();
         this.snippet = in.readString();
-
+        this.keywords = in.readString();
+        this.new_desk = in.readString();
     }
     public Article(){}
 }

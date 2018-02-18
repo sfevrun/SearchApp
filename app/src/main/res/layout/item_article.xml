@@ -19,6 +19,13 @@
         app:srcCompat="@mipmap/ic_launcher_round"
         android:maxHeight="100dp"/>
     <TextView
+        android:id="@+id/tvheadline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/fab_text"
+        android:text="TextView"
+        android:textColor="@color/colorPrimary"/>
+    <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

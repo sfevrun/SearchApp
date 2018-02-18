@@ -33,7 +33,7 @@ public class ArticleArrayAdapter extends RecyclerView.Adapter<ArticleArrayAdapte
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         ImageView imageView;
         TextView  tvDescription;
-
+        TextView  tvheadline;
         TextView tvTitle;
 
         public ViewHolder(View view){
@@ -41,6 +41,8 @@ public class ArticleArrayAdapter extends RecyclerView.Adapter<ArticleArrayAdapte
             imageView=(ImageView) view.findViewById(R.id.ivImage);
             tvTitle=(TextView) view.findViewById(R.id.tvTitle);
             tvDescription=(TextView) view.findViewById(R.id.tvDescription);
+            tvheadline=(TextView) view.findViewById(R.id.tvheadline);
+
             view.setOnClickListener(this);
         }
 
@@ -88,17 +90,23 @@ public class ArticleArrayAdapter extends RecyclerView.Adapter<ArticleArrayAdapte
         TextView tvDescription=viewHolder.tvDescription;
         // Set item views based on your views and data model
         TextView txtTitre = viewHolder.tvTitle;
-        txtTitre.setText(article.getHaedline());
 
+        TextView tvheadline = viewHolder.tvheadline;
+
+
+        txtTitre.setText(article.getNew_desk());
+        tvheadline.setText(article.getHaedline());
         ImageView imageView=viewHolder.imageView;
         imageView.setImageResource(0);
         String _thumball=article.getThumbNail();
         tvDescription.setText(article.getSnippet().toString());
+
         if(!TextUtils.isEmpty(_thumball)){
         //    Picasso.with(getContext()).load(_thumball).into(imageView);
-
+          //  imageView.getLayoutParams().height = 150;
             Picasso.with(getContext())
                     .load(_thumball)
+            .resize(300, 400)
                     .transform(new RoundedCornersTransformation(10, 10))
                     .into(imageView, new Callback() {
                         @Override

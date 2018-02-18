@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,6 +18,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -67,6 +70,7 @@ import cz.msebera.android.httpclient.Header;
 public class SearchActivity extends AppCompatActivity implements OnItemClickListenerInterface, CustomDialogFragment.EditCustomDialogListener {
     GridView gvResults;
     ArrayList<Article> articles;
+     ProgressDialog pd;
     // ArticleAdapter adapter;
     ArticleArrayAdapter adapter;
     RequestParams params;
@@ -90,14 +94,21 @@ public class SearchActivity extends AppCompatActivity implements OnItemClickList
         });*/
         viewSetup();
         params = new RequestParams();
-
+         pd = new ProgressDialog(this);
+        pd.setMessage("Please wait.");
+        pd.setCancelable(false);
+        pd.show();
 boolean b=isOnline();
 
         if(b){
+
             bindingData(params, null,0);
+
         }
         else {
-            Toast.makeText(this, "Hi, Pa gen internet tonton" , Toast.LENGTH_SHORT).show();
+            pd.dismiss();
+            alertDialogInternet();
+          //  Toast.makeText(this, "Hi, Pa gen internet tonton" , Toast.LENGTH_SHORT).show();
         }
 
 
@@ -201,6 +212,9 @@ boolean b=isOnline();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                articles.clear();
+                scrollListener.resetState();
+                adapter.notifyDataSetChanged();
                 bindingData(params, query,0);
                 return true;
             }
@@ -208,6 +222,9 @@ boolean b=isOnline();
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText.length() > 5) {
+                    articles.clear();
+                    scrollListener.resetState();
+                    adapter.notifyDataSetChanged();
                     bindingData(params, newText,0);
                 }
                 return false;
@@ -257,6 +274,9 @@ boolean b=isOnline();
 
         params.put("sort", sort);
       //  Toast.makeText(this, "Hi, " +params.toString(), Toast.LENGTH_SHORT).show();
+            articles.clear();
+          scrollListener.resetState();
+          adapter.notifyDataSetChanged();
         bindingData(params, null,0);
     }
     public void bindingData(RequestParams params, String query,int page) {
@@ -277,19 +297,43 @@ boolean b=isOnline();
                 try {
                     _articleJson = response.getJSONObject("response").getJSONArray("docs");
                     // Remove all books from the adapter
-                    articles.clear();
-                    adapter.notifyDataSetChanged(); // or notifyItemRangeRemoved
+                //    articles.clear();
+                //    adapter.notifyDataSetChanged(); // or notifyItemRangeRemoved
 // 3. Reset endless scroll listener when performing a new search
-                    scrollListener.resetState();
+                    //    articles.clear();
+                  //  scrollListener.resetState();
+                    //   adapter.notifyDataSetChanged();
+                    int curSize = adapter.getItemCount();
 
                     articles.addAll(Article.fromJsonArray(_articleJson));
                     //    adapter.addAll(Article.fromJsonArray(_articleJson));
                     //   adapter.notifyDataSetChanged();
+                    adapter.notifyItemRangeInserted(curSize, _articleJson.length());
+
                     Log.d("DEBUG", articles.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+                pd.dismiss();
             }
         });
+    }
+
+    public void alertDialogInternet(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(SearchActivity.this);
+        // Setting Dialog Title
+        alertDialog.setTitle("Connection check");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("Please check your internet connection");
+              alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog,int which) {
+                // Write your code here to invoke YES event
+                Toast.makeText(getApplicationContext(), "You clicked on YES", Toast.LENGTH_SHORT).show();
+            }
+        });
+              // Showing Alert Message
+        alertDialog.show();
     }
 }
