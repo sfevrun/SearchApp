@@ -1,5 +1,6 @@
 package com.example.saul.searchapp.adapters;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -20,37 +21,42 @@ import java.util.Locale;
  * Created by SAUL on 2/17/2018.
  */
 
-public class DateTimeDialog extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+public class DateTimeDialog extends DialogFragment{
+    DatePickerDialog.OnDateSetListener ondateSet;
+    DatePickerDialog.OnCancelListener onCancel;
+    private int year, month, day;
+
+    public void setCallBack(DatePickerDialog.OnDateSetListener ondate) {
+        ondateSet = ondate;
+    }
+
+    public void setCancelCallBack(DatePickerDialog.OnCancelListener oncancel){
+        onCancel = oncancel;
+    }
+
+    @Override
+    public void setArguments(Bundle args) {
+        super.setArguments(args);
+        year = args.getInt("year");
+        month = args.getInt("month");
+        day = args.getInt("day");
+
+
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-       // return super.onCreateDialog(savedInstanceState);
-        final Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        DatePickerDialog dpd = new DatePickerDialog(getActivity(),this,year,month,day);
-        return  dpd;
+        DatePickerDialog datePickerDialog =  new DatePickerDialog(
+                getActivity(),
+                //Reso,
+                ondateSet,
+                year,
+                month,
+                day);
 
+        return datePickerDialog;
     }
 
-    @Override
-    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-       EditText tv = (EditText)getDialog().findViewById(R.id.bgDate);
-        // Create a Date variable/object with user chosen date
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(0);
-        cal.set(year, month, day, 0, 0, 0);
-        Date chosenDate = cal.getTime();
-        // Format the date using style and locale
-        DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.US);
-        String formattedDate = df.format(chosenDate);
-
-        // Display the chosen date to app interface
-      //   tv.setText(formattedDate.toString());
-
-
-
-    }
 
 }

@@ -40,10 +40,12 @@ public class ArticleAdapter extends ArrayAdapter<Article> {
         }
         ImageView imageView=(ImageView) convertView.findViewById(R.id.ivImage);
         imageView.setImageResource(0);
-
         TextView tvTitle=(TextView) convertView.findViewById(R.id.tvTitle);
+        TextView tvDescription=(TextView) convertView.findViewById(R.id.tvDescription);
 
         tvTitle.setText(article.getHaedline());
+        tvDescription.setText(article.getSnippet());
+
         String _thumball=article.getThumbNail();
 
         if(!TextUtils.isEmpty(_thumball)){

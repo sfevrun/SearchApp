@@ -13,9 +13,12 @@ import android.widget.TextView;
 import com.example.saul.searchapp.R;
 import com.example.saul.searchapp.activities.OnItemClickListenerInterface;
 import com.example.saul.searchapp.models.Article;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+
+import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 
 /**
  * Created by SAUL on 2/16/2018.
@@ -29,7 +32,7 @@ public class ArticleArrayAdapter extends RecyclerView.Adapter<ArticleArrayAdapte
     private OnItemClickListenerInterface clicklistener;
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         ImageView imageView;
-
+        TextView  tvDescription;
 
         TextView tvTitle;
 
@@ -37,6 +40,7 @@ public class ArticleArrayAdapter extends RecyclerView.Adapter<ArticleArrayAdapte
             super(view);
             imageView=(ImageView) view.findViewById(R.id.ivImage);
             tvTitle=(TextView) view.findViewById(R.id.tvTitle);
+            tvDescription=(TextView) view.findViewById(R.id.tvDescription);
             view.setOnClickListener(this);
         }
 
@@ -81,16 +85,34 @@ public class ArticleArrayAdapter extends RecyclerView.Adapter<ArticleArrayAdapte
     public void onBindViewHolder(ArticleArrayAdapter.ViewHolder viewHolder, int position) {
         // Get the data model based on position
         Article article = articles.get(position);
-
+        TextView tvDescription=viewHolder.tvDescription;
         // Set item views based on your views and data model
         TextView txtTitre = viewHolder.tvTitle;
         txtTitre.setText(article.getHaedline());
+
         ImageView imageView=viewHolder.imageView;
         imageView.setImageResource(0);
         String _thumball=article.getThumbNail();
-
+        tvDescription.setText(article.getSnippet().toString());
         if(!TextUtils.isEmpty(_thumball)){
-            Picasso.with(getContext()).load(_thumball).into(imageView);
+        //    Picasso.with(getContext()).load(_thumball).into(imageView);
+
+            Picasso.with(getContext())
+                    .load(_thumball)
+                    .transform(new RoundedCornersTransformation(10, 10))
+                    .into(imageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+
+                        }
+
+                        @Override
+                        public void onError() {
+
+                        }
+                    });
+
+
         }
     }
 

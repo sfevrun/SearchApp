@@ -1,13 +1,20 @@
 package com.example.saul.searchapp.activities;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -36,6 +43,9 @@ import com.example.saul.searchapp.activities.ArticleActivity;
 import com.example.saul.searchapp.adapters.ArticleAdapter;
 import com.example.saul.searchapp.adapters.ArticleArrayAdapter;
 import com.example.saul.searchapp.models.Article;
+import com.example.saul.searchapp.models.QueryClass;
+import com.example.saul.searchapp.servives.CustomTabActivityHelper;
+import com.example.saul.searchapp.servives.EndlessRecyclerViewScrollListener;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestHandle;
@@ -44,6 +54,7 @@ import com.loopj.android.http.RequestParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.parceler.Parcels;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,11 +63,15 @@ import java.util.Locale;
 
 import cz.msebera.android.httpclient.Header;
 
-public class SearchActivity extends AppCompatActivity implements OnItemClickListenerInterface,CustomDialogFragment.EditCustomDialogListener {
-   GridView gvResults;
+public class SearchActivity extends AppCompatActivity implements OnItemClickListenerInterface, CustomDialogFragment.EditCustomDialogListener {
+    GridView gvResults;
     ArrayList<Article> articles;
-  // ArticleAdapter adapter;
+    // ArticleAdapter adapter;
     ArticleArrayAdapter adapter;
+    RequestParams params;
+    private EndlessRecyclerViewScrollListener scrollListener;
+    String url = "http://api.nytimes.com/svc/search/v2/articlesearch.json";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,37 +87,76 @@ public class SearchActivity extends AppCompatActivity implements OnItemClickList
                         .setAction("Action", null).show();
             }
         });*/
+        viewSetup();
+        params = new RequestParams();
 
-
-        bindingData(null);
+        bindingData(params, null,0);
     }
 
-    @Override
-    public void onFinishEditDialog(String inputText) {
-        Toast.makeText(this, "Hi, " + inputText, Toast.LENGTH_SHORT).show();
 
+    public void viewSetup() {
+        articles = new ArrayList<>();
+        RecyclerView rvArticles = (RecyclerView) findViewById(R.id.rvArticle);
+        adapter = new ArticleArrayAdapter(this, articles);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+
+        adapter.notifyDataSetChanged();
+        rvArticles.setAdapter(adapter);
+        adapter.setClicklistener(this);
+        // Set layout manager to position the items
+        // First param is number of columns and second param is orientation i.e Vertical or Horizontal
+        StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        rvArticles.setLayoutManager(gridLayoutManager);
+        scrollListener = new EndlessRecyclerViewScrollListener(gridLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to the bottom of the list
+             //   params.put("page", page);
+                bindingData(params,null,page);
+                Log.d("DEBUG", "" + totalItemsCount + " Page : " + page);
+
+            }
+        };
+        rvArticles.addOnScrollListener(scrollListener);
     }
 
-    public void viewSetup(){
-     articles=new ArrayList<>();
-    RecyclerView rvArticles = (RecyclerView) findViewById(R.id.rvArticle);
-    adapter=new ArticleArrayAdapter(this,articles);
-    adapter.notifyDataSetChanged();
-    rvArticles.setAdapter(adapter);
-    adapter.setClicklistener(this);
-    // Set layout manager to position the items
-    // First param is number of columns and second param is orientation i.e Vertical or Horizontal
-    StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-    rvArticles.setLayoutManager(gridLayoutManager);
 
-}
 
     @Override
     public void onClick(View view, int position) {
-        Intent in=new Intent(getApplicationContext(), ArticleActivity.class);
-        Article article=articles.get(position);
-        in.putExtra("article",article);
-        startActivity(in);
+        Intent in = new Intent(getApplicationContext(), ArticleActivity.class);
+        Article article = articles.get(position);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_name);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+       intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT,  article.getWebUrl().toString());
+       int requestCode = 100;
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        builder.setActionButton(bitmap, "Share Link", pendingIntent, true);
+        CustomTabsIntent customTabsIntent = builder.build();
+// set toolbar color
+        builder.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        builder.addDefaultShareMenuItem();
+        customTabsIntent.launchUrl(this, Uri.parse(article.getWebUrl()));
+
+
+     CustomTabActivityHelper.openCustomTab(this, customTabsIntent, Uri.parse(article.getWebUrl()),
+                new CustomTabActivityHelper.CustomTabFallback() {
+                    @Override
+                    public void openUri(Activity activity, Uri uri) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                        activity.startActivity(intent);
+                    }
+                });
+       // Intent intent = new Intent(this, MyActivity.class);
+     /*   in.putExtra("article", Parcels.wrap(article));
+          //  in.putExtra("article", article);
+        startActivity(in);*/
     }
 
     @Override
@@ -128,7 +182,7 @@ public class SearchActivity extends AppCompatActivity implements OnItemClickList
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                bindingData(null);
+                bindingData(params, null,0);
                 return true;
             }
 
@@ -136,14 +190,14 @@ public class SearchActivity extends AppCompatActivity implements OnItemClickList
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                bindingData(query);
+                bindingData(params, query,0);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText.length() > 5) {
-                    bindingData(newText);
+                    bindingData(params, newText,0);
                 }
                 return false;
             }
@@ -161,7 +215,7 @@ public class SearchActivity extends AppCompatActivity implements OnItemClickList
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-          //  openDialog();
+            //  openDialog();
             showEditDialog();
             //return true;
         }
@@ -175,53 +229,56 @@ public class SearchActivity extends AppCompatActivity implements OnItemClickList
         customDialogFragment.show(fm, "fragment_edit_name");
     }
 
-
-    public void onArticleSearch(View view) {
-        AsyncHttpClient _client=new AsyncHttpClient();
-        String url="http://api.nytimes.com/svc/search/v2/articlesearch.json";
-        RequestParams params=new RequestParams();
-        params.put("api-key","c8ea5b2da7b341a79cf0ee1a45279943");
-         _client.get(url, params, new JsonHttpResponseHandler(){
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-              //  super.onSuccess(statusCode, headers, response);
-                JSONArray _articleJson=null;
-                try {
-                    _articleJson=response.getJSONObject("response").getJSONArray("docs");
-                   articles.addAll(Article.fromJsonArray(_articleJson));
-              //    adapter.addAll(Article.fromJsonArray(_articleJson));
-                    adapter.notifyDataSetChanged();
-                    Log.d("DEBUG",articles.toString());
-                }catch (JSONException e){
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-    public void bindingData(String query){
-        viewSetup();
-        String url="http://api.nytimes.com/svc/search/v2/articlesearch.json";//  https://api.nytimes.com/svc/search/v2/articlesearch.json?begin_date=20160112&sort=oldest&fq=news_desk:(%22Education%22%20%22Health%22)&api-key=227c750bb7714fc39ef1559ef1bd8329
-        AsyncHttpClient _client=new AsyncHttpClient();
-        RequestParams params=new RequestParams();
-        if(query!=null){
-            params.put("query",query.toLowerCase());
+    @Override
+    public void onFinishEditDialog(QueryClass _queryclass) {
+        //  params=new RequestParams();
+        String _param = "news_desk:" + _queryclass.getDeskValue().toString().replace('[', '(').replace(']', ')');
+        //  RequestParams params=new RequestParams();
+        params = new RequestParams();
+        if (_queryclass.getDeskValue().toArray().length > 0) {
+            params.put("fq", _param);
+        }
+        String sort = _queryclass.getSort().toString().toLowerCase();
+        if(_queryclass.getDate()!=""){
+            params.put("begin_date", _queryclass.getDate().toString());
         }
 
-        params.put("api-key","c8ea5b2da7b341a79cf0ee1a45279943");
-        _client.get(url, params, new JsonHttpResponseHandler(){
+        params.put("sort", sort);
+
+
+        Toast.makeText(this, "Hi, " +params.toString(), Toast.LENGTH_SHORT).show();
+        bindingData(params, null,0);
+
+    }
+
+    public void bindingData(RequestParams params, String query,int page) {
+
+        //    Toast.makeText(this, "Hi, " +params.toString(), Toast.LENGTH_SHORT).show();
+        // String url="http://api.nytimes.com/svc/search/v2/articlesearch.json";//  https://api.nytimes.com/svc/search/v2/articlesearch.json?begin_date=20160112&sort=oldest&fq=news_desk:(%22Education%22%20%22Health%22)&api-key=227c750bb7714fc39ef1559ef1bd8329
+        AsyncHttpClient _client = new AsyncHttpClient();
+        //   RequestParams params=new RequestParams();
+        if (query != null) {
+            params.put("query", query.toLowerCase());
+        }
+        params.put("api-key", "c8ea5b2da7b341a79cf0ee1a45279943");
+        _client.get(url, params, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 //  super.onSuccess(statusCode, headers, response);
-                JSONArray _articleJson=null;
+                JSONArray _articleJson = null;
                 try {
-                    _articleJson=response.getJSONObject("response").getJSONArray("docs");
+                    _articleJson = response.getJSONObject("response").getJSONArray("docs");
+                    // Remove all books from the adapter
+                    articles.clear();
+                    adapter.notifyDataSetChanged(); // or notifyItemRangeRemoved
+// 3. Reset endless scroll listener when performing a new search
+                    scrollListener.resetState();
 
                     articles.addAll(Article.fromJsonArray(_articleJson));
-            //    adapter.addAll(Article.fromJsonArray(_articleJson));
-                    adapter.notifyDataSetChanged();
-                    Log.d("DEBUG",articles.toString());
-                }catch (JSONException e){
+                    //    adapter.addAll(Article.fromJsonArray(_articleJson));
+                    //   adapter.notifyDataSetChanged();
+                    Log.d("DEBUG", articles.toString());
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
