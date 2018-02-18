@@ -42,14 +42,17 @@ public class Article implements Parcelable {
             this.haedline=jsonObject.getJSONObject("headline").getString("main");
             JSONArray _multimedia=jsonObject.getJSONArray("multimedia");
             if(_multimedia.length()>0){
-              /*  for (int i=0;i>_multimedia.length();i++){
-                    if (_multimedia.getJSONObject(i).getString("subtype")=="xlarge"){
-                        this.thumbNail="http://www.nytimes.com/"+_multimedia.getJSONObject(i).getString("url");
+
+               for (int i=0;i<_multimedia.length();i++){
+           JSONObject jsonObject1=   _multimedia.getJSONObject(i);
+                    if (jsonObject1.getString("subtype").equals("xlarge")){
+                        this.thumbNail="http://www.nytimes.com/"+jsonObject1.getString("url");
+                        break;
                     }
                 }
-                */
-                JSONObject _multimediajson=_multimedia.getJSONObject(0);
-                this.thumbNail="http://www.nytimes.com/"+_multimediajson.getString("url");
+
+           //     JSONObject _multimediajson=_multimedia.getJSONObject(0);
+             //   this.thumbNail="http://www.nytimes.com/"+_multimediajson.getString("url");
             }else{
                 this.thumbNail="";
             }

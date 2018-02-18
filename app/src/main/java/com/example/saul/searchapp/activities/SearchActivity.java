@@ -56,6 +56,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.parceler.Parcels;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -90,43 +91,53 @@ public class SearchActivity extends AppCompatActivity implements OnItemClickList
         viewSetup();
         params = new RequestParams();
 
-        bindingData(params, null,0);
-    }
+boolean b=isOnline();
 
+        if(b){
+            bindingData(params, null,0);
+        }
+        else {
+            Toast.makeText(this, "Hi, Pa gen internet tonton" , Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+    public boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        } catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+        return false;
+    }
 
     public void viewSetup() {
         articles = new ArrayList<>();
         RecyclerView rvArticles = (RecyclerView) findViewById(R.id.rvArticle);
         adapter = new ArticleArrayAdapter(this, articles);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-
         adapter.notifyDataSetChanged();
         rvArticles.setAdapter(adapter);
         adapter.setClicklistener(this);
-        // Set layout manager to position the items
-        // First param is number of columns and second param is orientation i.e Vertical or Horizontal
-        StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+       StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         rvArticles.setLayoutManager(gridLayoutManager);
         scrollListener = new EndlessRecyclerViewScrollListener(gridLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                // Triggered only when new data needs to be appended to the list
-                // Add whatever code is needed to append new items to the bottom of the list
-             //   params.put("page", page);
+
                 bindingData(params,null,page);
                 Log.d("DEBUG", "" + totalItemsCount + " Page : " + page);
-
             }
         };
         rvArticles.addOnScrollListener(scrollListener);
     }
-
-
-
     @Override
     public void onClick(View view, int position) {
         Intent in = new Intent(getApplicationContext(), ArticleActivity.class);
         Article article = articles.get(position);
+        ////////////////////////////////////////
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_name);
         Intent intent = new Intent(Intent.ACTION_SEND);
        intent.setType("text/plain");
@@ -208,6 +219,7 @@ public class SearchActivity extends AppCompatActivity implements OnItemClickList
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -244,22 +256,18 @@ public class SearchActivity extends AppCompatActivity implements OnItemClickList
         }
 
         params.put("sort", sort);
-
-
-        Toast.makeText(this, "Hi, " +params.toString(), Toast.LENGTH_SHORT).show();
+      //  Toast.makeText(this, "Hi, " +params.toString(), Toast.LENGTH_SHORT).show();
         bindingData(params, null,0);
-
     }
-
     public void bindingData(RequestParams params, String query,int page) {
-
-        //    Toast.makeText(this, "Hi, " +params.toString(), Toast.LENGTH_SHORT).show();
+     //    Toast.makeText(this, "Hi, " +params.toString(), Toast.LENGTH_SHORT).show();
         // String url="http://api.nytimes.com/svc/search/v2/articlesearch.json";//  https://api.nytimes.com/svc/search/v2/articlesearch.json?begin_date=20160112&sort=oldest&fq=news_desk:(%22Education%22%20%22Health%22)&api-key=227c750bb7714fc39ef1559ef1bd8329
         AsyncHttpClient _client = new AsyncHttpClient();
         //   RequestParams params=new RequestParams();
         if (query != null) {
             params.put("query", query.toLowerCase());
         }
+        params.put("page", page);
         params.put("api-key", "c8ea5b2da7b341a79cf0ee1a45279943");
         _client.get(url, params, new JsonHttpResponseHandler() {
             @Override
