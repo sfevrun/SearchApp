@@ -102,11 +102,11 @@ public class ArticleArrayAdapter extends RecyclerView.Adapter<ArticleArrayAdapte
         tvDescription.setText(article.getSnippet().toString());
 
         if(!TextUtils.isEmpty(_thumball)){
-        //    Picasso.with(getContext()).load(_thumball).into(imageView);
-          //  imageView.getLayoutParams().height = 150;
+            //    Picasso.with(getContext()).load(_thumball).into(imageView);
+            //  imageView.getLayoutParams().height = 150;
             Picasso.with(getContext())
                     .load(_thumball)
-            .resize(300, 400)
+                    .resize(300, 400)
                     .transform(new RoundedCornersTransformation(10, 10))
                     .into(imageView, new Callback() {
                         @Override
@@ -130,3 +130,110 @@ public class ArticleArrayAdapter extends RecyclerView.Adapter<ArticleArrayAdapte
         return articles.size();
     }
 }
+
+
+
+    // Easy access to the context object in the recyclerview
+/*    private Context getContext() {
+        return mContext;
+    }
+
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        Context context = parent.getContext();
+    /*    LayoutInflater inflater = LayoutInflater.from(context);
+        // Inflate the custom layout
+        View contactView = inflater.inflate(R.layout.item_article, parent, false);
+        // Return a new holder instance
+        ViewHolder viewHolder = new ViewHolder(contactView);
+
+
+        RecyclerView.ViewHolder viewHolder;
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+
+        switch (viewType) {
+            case WITH_IMAGE:
+                View vImage = inflater.inflate(R.layout.item_article, parent, false);
+                viewHolder = new ViewHolderImage(vImage);
+                break;
+            case WITHOUT_IMAGE:
+                View vWithoutImage = inflater.inflate(R.layout.item_article_no_image, parent, false);
+                viewHolder = new ViewHolderWithoutImage(vWithoutImage);
+                break;
+            default:
+                View vDefault = inflater.inflate(R.layout.item_article_no_image, parent, false);
+                viewHolder = new ViewHolderWithoutImage(vDefault);
+                break;
+        }
+
+        return viewHolder;
+
+    }
+
+    // Involves populating data into the item through holder
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        // Get the data model based on position
+        Article article = articles.get(position);
+
+        switch (holder.getItemViewType()) {
+            case WITH_IMAGE:
+                ViewHolderImage viewHolderImage = (ViewHolderImage) holder;
+                viewHolderImage.getTvTitle().setText(article.getNew_desk());
+                viewHolderImage.getTvDescription().setText(article.getSnippet().toString());
+                viewHolderImage.getTvheadline().setText(article.getHaedline());
+                String _thumball=article.getThumbNail();
+                if(!TextUtils.isEmpty(_thumball)){
+
+
+
+                Picasso.with(getContext())
+                        .load(article.getThumbNail())
+                        .resize(300, 400)
+                        .transform(new RoundedCornersTransformation(10, 10))
+                        .into(viewHolderImage.getImageView(), new Callback() {
+                            @Override
+                            public void onSuccess() {
+
+                            }
+
+                            @Override
+                            public void onError() {
+
+                            }
+
+                        }); }
+                break;
+            case WITHOUT_IMAGE:
+                ViewHolderWithoutImage viewNoImage = (ViewHolderWithoutImage) holder;
+                viewNoImage.getTvTitle().setText(article.getNew_desk());
+                viewNoImage.getTvDescription().setText(article.getSnippet().toString());
+                viewNoImage.getTvheadline().setText(article.getHaedline());
+
+
+                break;
+
+        }
+    }
+    @Override
+    public int getItemViewType(int position) {
+      //  return super.getItemViewType(position);
+        if (articles.get(position).getThumbNail() != null)
+            return WITH_IMAGE;
+        else
+            return WITHOUT_IMAGE;
+
+    }
+
+    // Returns the total count of items in the list
+    @Override
+    public int getItemCount() {
+        return articles.size();
+    }
+
+    public Article getArticle(int position) {
+        return articles.get(position);
+    }
+}
+*/
